@@ -62,8 +62,20 @@
 				<version>1.4.4</version>
 				<executions>
 					<execution>
+						<id>BAMCollection</id>
 						<configuration>
 							<mainClass>InjectMetadata</mainClass>
+							<filename>InjectMetaDataBAMCollection-${project.version}.${project.packaging}</filename>
+						</configuration>
+						<goals>
+							<goal>one-jar</goal>
+						</goals>
+					</execution>
+					<execution>
+						<id>CDArchive</id>
+						<configuration>
+							<mainClass>InjectMetadata</mainClass>
+							<filename>InjectMetaDataCDArchive-${project.version}.${project.packaging}</filename>
 						</configuration>
 						<goals>
 							<goal>one-jar</goal>
@@ -71,7 +83,7 @@
 					</execution>
 				</executions>
 			</plugin>
-		</plugins>		
+		</plugins>
 	</build>
 
 	<pluginRepositories>
