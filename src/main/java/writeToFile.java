@@ -50,7 +50,7 @@ public class writeToFile {
 		
 		/*
 		InjectMetaDataController bcac = new BAMCDArchiveController(scTarDir,db, md);
-		((BAMCDArchiveController)bcac).runInjectToFile("/Users/achang/Desktop/ca-metadata/cametadata.txt");				
+		((BAMCDArchiveController)bcac).runInjectToFile("/path/to/destinationfile.txt");				
 		*/
 		
 		System.out.println("End: " + new Date().toString());
