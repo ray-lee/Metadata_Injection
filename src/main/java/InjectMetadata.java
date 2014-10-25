@@ -9,10 +9,11 @@ import controllers.InjectMetaDataController;
 import java.util.Date;
 import java.util.Scanner;
 
-public class InjectMetadata {
-
+public abstract class InjectMetadata {
+	protected abstract String getType();
+	protected abstract InjectMetaDataController getController(String targetDir, DBUtils dbUtils, MDUtils mdUtils);
 	
-	private static boolean check_dialog(String sfolderPath, String sType) {
+	protected static boolean check_dialog(String sfolderPath, String sType) {
 
 		System.out.println("Please make sure the folder is " + sType + " type:");
 		System.out.println(sfolderPath);
@@ -33,7 +34,7 @@ public class InjectMetadata {
 	/**
 	 * @param args
 	 */
-	public static void main(String[] args) {
+	protected void injectMetadata(String[] args) {
 		// TODO Auto-generated method stub
 		MDUtils md = null;
 		DBUtils db = null;
@@ -43,35 +44,16 @@ public class InjectMetadata {
 			System.out.println("Please assign the full path of the images folder!");
 			return;
 		}
-        
-
-		// archive start
-		/*
-		if (!InjectMetadata.check_dialog(args[0], "Archive"))	{
-			System.out.println("Please run the program again!");
-			System.exit(0);
-		}
-		
-		System.out.println("Now processing the Archive type folders!");
-		System.out.println("Start: " + new Date().toString());
-		*/
-		// archive end
 		
 		
-		//bamcollection start
-		
-		if (!InjectMetadata.check_dialog(args[0], "BAM Collection"))	{
+		if (!InjectMetadata.check_dialog(args[0], getType()))	{
 			System.out.println("Please run the program again!");
 			System.exit(0);
 		}
 		
 		
-		System.out.println("Now processing the BAM Collection type folders!");		
+		System.out.println("Now processing the " + getType() + " type folders!");
 		System.out.println("Start: " + new Date().toString());
-		
-		//bamcollection end
-	    
-		//System.out.println("Start: " + new Date().toString());
 		
 		try {
 			 md = MDUtils.getInstance();
@@ -92,15 +74,8 @@ public class InjectMetadata {
 		//System.out.println(args[0].trim());
 
 		
-		InjectMetaDataController bcc = new BAMCOLLECTIONController(args[0].trim(),db, md);
+		InjectMetaDataController bcc = getController(args[0].trim(),db, md);
 		bcc.runInject();				
-        
-				
-		//System.out.println(args[0].trim());
-		/*
-		InjectMetaDataController bcac = new BAMCDArchiveController(args[0].trim(),db, md);
-		bcac.runInject();				
-		*/
 		
 		System.out.println("End: " + new Date().toString());
 

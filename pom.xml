@@ -64,7 +64,7 @@
 					<execution>
 						<id>BAMCollection</id>
 						<configuration>
-							<mainClass>InjectMetadata</mainClass>
+							<mainClass>BAMCollectionInjectMetadata</mainClass>
 							<filename>InjectMetaDataBAMCollection-${project.version}.${project.packaging}</filename>
 						</configuration>
 						<goals>
@@ -74,7 +74,7 @@
 					<execution>
 						<id>CDArchive</id>
 						<configuration>
-							<mainClass>InjectMetadata</mainClass>
+							<mainClass>CDArchiveInjectMetadata</mainClass>
 							<filename>InjectMetaDataCDArchive-${project.version}.${project.packaging}</filename>
 						</configuration>
 						<goals>
