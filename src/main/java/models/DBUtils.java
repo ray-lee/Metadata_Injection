@@ -37,8 +37,8 @@ public class DBUtils {
 	
 	private DBUtils() throws SQLException, ClassNotFoundException, InstantiationException,IllegalAccessException {
 		mStatements = new ArrayList<Statement>();				
-		Class.forName(DRIVER).newInstance();		
-		mSqlConnection = DriverManager.getConnection(URL, USERNAME, PASSWORD);
+		//Class.forName(DRIVER).newInstance();
+		//mSqlConnection = DriverManager.getConnection(URL, USERNAME, PASSWORD);
 
 	}
 
@@ -71,46 +71,66 @@ public class DBUtils {
 
 	
 	public ArrayList<ImageMetaData> queryImageMetaData(String sACCNumber) throws SQLException {
-    	ResultSet rsIMD = null;
-        int iRecordCount = 0;
-         	        	        
-    	if ( mSqlImageMetaDataQuery == null) mSqlImageMetaDataQuery = prepareStatement(getImageMetaDataSqlQuery());
-    	mSqlImageMetaDataQuery.setString( 1, sACCNumber);
-    	rsIMD = mSqlImageMetaDataQuery.executeQuery();
-			    		    	
+//    	ResultSet rsIMD = null;
+//        int iRecordCount = 0;
+//         	        	        
+//    	if ( mSqlImageMetaDataQuery == null) mSqlImageMetaDataQuery = prepareStatement(getImageMetaDataSqlQuery());
+//    	mSqlImageMetaDataQuery.setString( 1, sACCNumber);
+//    	rsIMD = mSqlImageMetaDataQuery.executeQuery();
+//			    		    	
     	if ( mImageMetaDataDataList == null ) 	    	
     		mImageMetaDataDataList = new ArrayList<ImageMetaData>();
     	else	
     		mImageMetaDataDataList.clear();
+//        
+//    	while (rsIMD.next()) {
+//        	iRecordCount++;
+//        	
+//        	mImageMetaDataDataList.add( 
+//        	new ImageMetaData(rsIMD.getString("Title"),
+//        			rsIMD.getString("Artist"),
+//        			rsIMD.getString("CreditLine"),
+//        			rsIMD.getString("DateMade"),
+//        			rsIMD.getString("IdNumber"),
+//        			rsIMD.getString("ItemClass"),
+//        			rsIMD.getString("Materials"),
+//        			rsIMD.getString("Measurement"),
+//        			rsIMD.getString("OriginOrPlace"),
+//	        		rsIMD.getString("PhotoCredit"),
+//	        		rsIMD.getString("Site"),
+//	        		rsIMD.getString("CopyRightCredit"),
+//        			rsIMD.getString("SubjectOne"),
+//        			rsIMD.getString("SubjectTwo"),
+//        			rsIMD.getString("SubjectThree"),
+//        			rsIMD.getString("SubjectFour"),
+//        			rsIMD.getString("SubjectFive"))
+//        	);
+//        }
+//        	    	
+//    	rsIMD.close();
+//        	        
+//        if (iRecordCount == 0) throw new SQLException("No Records Found.");
         
-    	while (rsIMD.next()) {
-        	iRecordCount++;
-        	
-        	mImageMetaDataDataList.add( 
-        	new ImageMetaData(rsIMD.getString("Title"),
-        			rsIMD.getString("Artist"),
-        			rsIMD.getString("CreditLine"),
-        			rsIMD.getString("DateMade"),
-        			rsIMD.getString("IdNumber"),
-        			rsIMD.getString("ItemClass"),
-        			rsIMD.getString("Materials"),
-        			rsIMD.getString("Measurement"),
-        			rsIMD.getString("OriginOrPlace"),
-	        		rsIMD.getString("PhotoCredit"),
-	        		rsIMD.getString("Site"),
-	        		rsIMD.getString("CopyRightCredit"),
-        			rsIMD.getString("SubjectOne"),
-        			rsIMD.getString("SubjectTwo"),
-        			rsIMD.getString("SubjectThree"),
-        			rsIMD.getString("SubjectFour"),
-        			rsIMD.getString("SubjectFive"))
-        	);
-        }
-        	    	
-    	rsIMD.close();
-        	        
-        if (iRecordCount == 0) throw new SQLException("No Records Found.");
-               
+    	mImageMetaDataDataList.add( 
+    	new ImageMetaData("Title",
+    			"Artist",
+    			"CreditLine",
+    			"DateMade",
+    			"IdNumber",
+    			"ItemClass",
+    			"Materials",
+    			"Measurement",
+    			"OriginOrPlace",
+        		"PhotoCredit",
+        		"Site",
+        		"CopyRightCredit",
+    			"SubjectOne",
+    			"SubjectTwo",
+    			"SubjectThree",
+    			"SubjectFour",
+    			"SubjectFive")
+    	);
+
         return mImageMetaDataDataList;        
     }	
 
