@@ -52,9 +52,6 @@ public abstract class InjectMetadata {
 		}
 		
 		
-		System.out.println("Now processing the " + getType() + " type folders!");
-		System.out.println("Start: " + new Date().toString());
-		
 		try {
 			 md = MDUtils.getInstance();
 		} catch (FileNotFoundException e) {
@@ -67,13 +64,15 @@ public abstract class InjectMetadata {
 			db = DBUtils.getInstance();
 		} catch (Exception e) {
 			 System.out.println("Fail to initiate the DB utility.");	
-			 e.printStackTrace();
+			 System.out.println(e.getLocalizedMessage());
 			 System.exit(-1);
 		} 
 		 
+		System.out.println("Now processing the " + getType() + " type folders!");
+		System.out.println("Start: " + new Date().toString());
+
 		//System.out.println(args[0].trim());
 
-		
 		InjectMetaDataController bcc = getController(args[0].trim(),db, md);
 		bcc.runInject();				
 		

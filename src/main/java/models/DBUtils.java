@@ -2,6 +2,7 @@ package models;
 
 import models.ImageMetaData;
 
+import java.io.Console;
 import java.io.UnsupportedEncodingException;
 import java.sql.Connection;
 import java.sql.PreparedStatement;
@@ -11,6 +12,7 @@ import java.sql.SQLException;
 import java.sql.DriverManager;
 import java.text.SimpleDateFormat;
 import java.util.ArrayList;
+import java.util.Arrays;
 import java.util.Date;
 
 
@@ -18,10 +20,8 @@ public class DBUtils {
 
 	
 	private static volatile DBUtils mdbUniqueDbu = null;
-	private static final String DRIVER = "com.filemaker.jdbc.Driver";
-	private static final String USERNAME = "";
-	private static final String PASSWORD = "";
-	private static final String URL = "jdbc:filemaker://localhost/BAMCollection";
+	private static final String DRIVER = "org.postgresql.Driver";
+	private static final String URL = "jdbc:postgresql://localhost/nuxeo?ssl=true&sslfactory=org.postgresql.ssl.NonValidatingFactory";
 	protected Connection mSqlConnection = null;
 	protected ArrayList<Statement> mStatements = null;	
     protected PreparedStatement mSqlImageMetaDataQuery = null;    
@@ -37,11 +37,18 @@ public class DBUtils {
 	
 	private DBUtils() throws SQLException, ClassNotFoundException, InstantiationException,IllegalAccessException {
 		mStatements = new ArrayList<Statement>();				
-		//Class.forName(DRIVER).newInstance();
-		//mSqlConnection = DriverManager.getConnection(URL, USERNAME, PASSWORD);
-
+		Class.forName(DRIVER).newInstance();
+		connect();
 	}
 
+	private void connect() throws SQLException {
+		Console console = System.console();
+		String username = console.readLine("User name: ");
+		char[] password = console.readPassword("Password: ");
+
+		mSqlConnection = DriverManager.getConnection(URL, username, new String(password));
+	}
+	
 	private PreparedStatement prepareStatement(String sStatement) throws SQLException {
 		PreparedStatement p = mSqlConnection.prepareStatement(sStatement);
 		mStatements.add(p);		
@@ -71,78 +78,58 @@ public class DBUtils {
 
 	
 	public ArrayList<ImageMetaData> queryImageMetaData(String sACCNumber) throws SQLException {
-//    	ResultSet rsIMD = null;
-//        int iRecordCount = 0;
-//         	        	        
-//    	if ( mSqlImageMetaDataQuery == null) mSqlImageMetaDataQuery = prepareStatement(getImageMetaDataSqlQuery());
-//    	mSqlImageMetaDataQuery.setString( 1, sACCNumber);
-//    	rsIMD = mSqlImageMetaDataQuery.executeQuery();
-//			    		    	
+    	ResultSet rsIMD = null;
+        int iRecordCount = 0;
+         	        	        
+    	if ( mSqlImageMetaDataQuery == null) mSqlImageMetaDataQuery = prepareStatement(getImageMetaDataSqlQuery());
+    	mSqlImageMetaDataQuery.setString( 1, sACCNumber);
+    	rsIMD = mSqlImageMetaDataQuery.executeQuery();
+			    		    	
     	if ( mImageMetaDataDataList == null ) 	    	
     		mImageMetaDataDataList = new ArrayList<ImageMetaData>();
     	else	
     		mImageMetaDataDataList.clear();
-//        
-//    	while (rsIMD.next()) {
-//        	iRecordCount++;
-//        	
-//        	mImageMetaDataDataList.add( 
-//        	new ImageMetaData(rsIMD.getString("Title"),
-//        			rsIMD.getString("Artist"),
-//        			rsIMD.getString("CreditLine"),
-//        			rsIMD.getString("DateMade"),
-//        			rsIMD.getString("IdNumber"),
-//        			rsIMD.getString("ItemClass"),
-//        			rsIMD.getString("Materials"),
-//        			rsIMD.getString("Measurement"),
-//        			rsIMD.getString("OriginOrPlace"),
-//	        		rsIMD.getString("PhotoCredit"),
-//	        		rsIMD.getString("Site"),
-//	        		rsIMD.getString("CopyRightCredit"),
-//        			rsIMD.getString("SubjectOne"),
-//        			rsIMD.getString("SubjectTwo"),
-//        			rsIMD.getString("SubjectThree"),
-//        			rsIMD.getString("SubjectFour"),
-//        			rsIMD.getString("SubjectFive"))
-//        	);
-//        }
-//        	    	
-//    	rsIMD.close();
-//        	        
-//        if (iRecordCount == 0) throw new SQLException("No Records Found.");
         
-    	mImageMetaDataDataList.add( 
-    	new ImageMetaData("Title",
-    			"Artist",
-    			"CreditLine",
-    			"DateMade",
-    			"IdNumber",
-    			"ItemClass",
-    			"Materials",
-    			"Measurement",
-    			"OriginOrPlace",
-        		"PhotoCredit",
-        		"Site",
-        		"CopyRightCredit",
-    			"SubjectOne",
-    			"SubjectTwo",
-    			"SubjectThree",
-    			"SubjectFour",
-    			"SubjectFive")
-    	);
-
+    	while (rsIMD.next()) {
+        	iRecordCount++;
+        	
+        	mImageMetaDataDataList.add( 
+        	new ImageMetaData(rsIMD.getString("Title"),
+        			rsIMD.getString("Artist"),
+        			rsIMD.getString("CreditLine"),
+        			rsIMD.getString("DateMade"),
+        			rsIMD.getString("IdNumber"),
+        			rsIMD.getString("ItemClass"),
+        			rsIMD.getString("Materials"),
+        			rsIMD.getString("Measurement"),
+        			rsIMD.getString("OriginOrPlace"),
+	        		rsIMD.getString("PhotoCredit"),
+	        		rsIMD.getString("Site"),
+	        		rsIMD.getString("CopyRightCredit"),
+        			rsIMD.getString("SubjectOne"),
+        			rsIMD.getString("SubjectTwo"),
+        			rsIMD.getString("SubjectThree"),
+        			rsIMD.getString("SubjectFour"),
+        			rsIMD.getString("SubjectFive"))
+        	);
+        }
+        	    	
+    	rsIMD.close();
+        	        
+        if (iRecordCount == 0) throw new SQLException("No Records Found.");
+        
         return mImageMetaDataDataList;        
     }	
 
 	    
     
     private String getImageMetaDataSqlQuery() { 
-    	return new String ("SELECT ct_Artists_lf AS Artist, \"Full BAMPFA Credit Line\" AS CreditLine, DateMade, \"ID Number\" AS IdNumber, ItemClass, " +
-    					   "Materials, Measurement, OriginOrPlace, Title, " +
-    					   "\"Photo Credit\" AS PhotoCredit, Site, CopyRightCredit, " +
-    					   "subdescription[1] AS SubjectOne, subdescription[2] AS SubjectTwo, subdescription[3] AS SubjectThree, " +
-    					   "subdescription[4] AS SubjectFour, subdescription[5] AS SubjectFive " +
-    					   "FROM \"Collection Items\" WHERE \"ID Number\" = ? "); 
+    	return new String ("SELECT 'artistcalc' AS Artist, 'fullbampfacreditline' AS CreditLine, 'datemade' AS DateMade, 'idnumber' AS IdNumber, 'itemclass' AS ItemClass, " +
+    					   "'materials' AS Materials, 'measurement' AS Measurement, 'artistorigin' AS OriginOrPlace, 'title' AS Title, " +
+    					   "'photocredit' AS PhotoCredit, 'site' AS Site, 'copyrightcredit' AS CopyRightCredit, " +
+    					   "'subjectone' AS SubjectOne, 'subjecttwo' AS SubjectTwo, 'subjectthree' AS SubjectThree, " +
+    					   "'subjectfour' AS SubjectFour, 'subjectfive' AS SubjectFive " +
+    					   "FROM collectionobjects_common WHERE objectnumber = ? "); 
     }
     
     
