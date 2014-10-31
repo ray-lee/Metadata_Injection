@@ -21,7 +21,7 @@ public class DBUtils {
 	
 	private static volatile DBUtils mdbUniqueDbu = null;
 	private static final String DRIVER = "org.postgresql.Driver";
-	private static final String URL = "jdbc:postgresql://localhost/nuxeo?ssl=true&sslfactory=org.postgresql.ssl.NonValidatingFactory";
+	private static final String URL = "jdbc:postgresql://bampfa.cspace.berkeley.edu/bampfa_domain?ssl=true"; //&sslfactory=org.postgresql.ssl.NonValidatingFactory";
 	protected Connection mSqlConnection = null;
 	protected ArrayList<Statement> mStatements = null;	
     protected PreparedStatement mSqlImageMetaDataQuery = null;    
@@ -43,7 +43,8 @@ public class DBUtils {
 
 	private void connect() throws SQLException {
 		Console console = System.console();
-		String username = console.readLine("User name: ");
+		console.writer().println("Enter your database login information:");
+		String username = console.readLine("User: ");
 		char[] password = console.readPassword("Password: ");
 
 		mSqlConnection = DriverManager.getConnection(URL, username, new String(password));
@@ -124,12 +125,12 @@ public class DBUtils {
 	    
     
     private String getImageMetaDataSqlQuery() { 
-    	return new String ("SELECT 'artistcalc' AS Artist, 'fullbampfacreditline' AS CreditLine, 'datemade' AS DateMade, 'idnumber' AS IdNumber, 'itemclass' AS ItemClass, " +
-    					   "'materials' AS Materials, 'measurement' AS Measurement, 'artistorigin' AS OriginOrPlace, 'title' AS Title, " +
-    					   "'photocredit' AS PhotoCredit, 'site' AS Site, 'copyrightcredit' AS CopyRightCredit, " +
-    					   "'subjectone' AS SubjectOne, 'subjecttwo' AS SubjectTwo, 'subjectthree' AS SubjectThree, " +
-    					   "'subjectfour' AS SubjectFour, 'subjectfive' AS SubjectFive " +
-    					   "FROM collectionobjects_common WHERE objectnumber = ? "); 
+    	return new String ("SELECT artistcalc AS Artist, fullbampfacreditline AS CreditLine, datemade AS DateMade, idnumber AS IdNumber, itemclass AS ItemClass, " +
+    					   "materials AS Materials, measurement AS Measurement, artistorigin AS OriginOrPlace, title AS Title, " +
+    					   "photocredit AS PhotoCredit, site AS Site, copyrightcredit AS CopyRightCredit, " +
+    					   "subjectone AS SubjectOne, subjecttwo AS SubjectTwo, subjectthree AS SubjectThree, " +
+    					   "subjectfour AS SubjectFour, subjectfive AS SubjectFive " +
+    					   "FROM bampfa_denorm.bampfa_collectionitems_vw WHERE idnumber = ? "); 
     }
     
     
