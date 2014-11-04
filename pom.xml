@@ -7,7 +7,7 @@
 	<groupId>edu.berkeley.bampfa</groupId>
 	<artifactId>Metadata_Injection</artifactId>
 	<packaging>jar</packaging>
-	<version>2.0.1</version>
+	<version>2.0.2-SNAPSHOT</version>
 	<name>Metadata_Injection</name>
 	
 	<dependencies>
@@ -25,7 +25,7 @@
 		</dependency>
 
 		<!--
-			moss_image does not appear to be available from any public maven repo. The jar may be downloaded at
+			moss-image does not appear to be available from any public maven repo. The jar may be downloaded at
 			http://moss.digitalcave.ca/nightlies/moss-image-2.1.0.0.zip, and installed into
 			your local maven repo with the following command:
 
