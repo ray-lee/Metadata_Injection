@@ -7,7 +7,7 @@
 	<groupId>edu.berkeley.bampfa</groupId>
 	<artifactId>Metadata_Injection</artifactId>
 	<packaging>jar</packaging>
-	<version>2.0.1-SNAPSHOT</version>
+	<version>2.0.1</version>
 	<name>Metadata_Injection</name>
 	
 	<dependencies>
