@@ -67,7 +67,7 @@ public class MDUtils {
 									" MATERIALS: " + alimd.get(i).getMaterials() + 
 									" DIMENSIONS: " + alimd.get(i).getMeasurement() +
 									" CREDIT_LINE: " + alimd.get(i).getCreditLine() +
-									" COPYRIGHT: " + alimd.get(i).getCopyRightCredit() +
+									((alimd.get(i).getCopyRightCredit().trim().isEmpty()) ? "" : " COPYRIGHT: " + alimd.get(i).getCopyRightCredit()) +
 									((alimd.get(i).getPhotoCredit().trim().isEmpty()) ? "" : " PHOTOGRAPHER: " + alimd.get(i).getPhotoCredit()));
 			tags.put("coverage", alimd.get(i).getDateMade() + 
 								((alimd.get(i).getSite().trim().isEmpty()) ? "" : " PLACE: " + alimd.get(i).getSite()));
