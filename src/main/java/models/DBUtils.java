@@ -21,7 +21,7 @@ public class DBUtils {
 	
 	private static volatile DBUtils mdbUniqueDbu = null;
 	private static final String DRIVER = "org.postgresql.Driver";
-	private static final String URL = "jdbc:postgresql://bampfa.cspace.berkeley.edu/bampfa_domain?ssl=true"; //&sslfactory=org.postgresql.ssl.NonValidatingFactory";
+	private static final String URL = "jdbc:postgresql://bampfa.cspace.berkeley.edu/bampfa_domain_bampfa?ssl=true"; //&sslfactory=org.postgresql.ssl.NonValidatingFactory";
 	protected Connection mSqlConnection = null;
 	protected ArrayList<Statement> mStatements = null;	
     protected PreparedStatement mSqlImageMetaDataQuery = null;    
