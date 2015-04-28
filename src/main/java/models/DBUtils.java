@@ -1,139 +1,163 @@
 package models;
 
-import models.ImageMetaData;
-
 import java.io.Console;
-import java.io.UnsupportedEncodingException;
-import java.sql.Connection;
-import java.sql.PreparedStatement;
-import java.sql.ResultSet;
-import java.sql.Statement;
-import java.sql.SQLException;
-import java.sql.DriverManager;
-import java.text.SimpleDateFormat;
+import java.io.IOException;
+import java.io.StringReader;
 import java.util.ArrayList;
-import java.util.Arrays;
-import java.util.Date;
+
+import org.apache.commons.csv.CSVFormat;
+import org.apache.commons.csv.CSVRecord;
+import org.apache.commons.lang3.StringEscapeUtils;
+import org.apache.http.HttpEntity;
+import org.apache.http.auth.AuthScope;
+import org.apache.http.auth.UsernamePasswordCredentials;
+import org.apache.http.client.ClientProtocolException;
+import org.apache.http.client.CredentialsProvider;
+import org.apache.http.client.methods.CloseableHttpResponse;
+import org.apache.http.client.methods.HttpGet;
+import org.apache.http.client.methods.HttpPost;
+import org.apache.http.client.protocol.HttpClientContext;
+import org.apache.http.entity.StringEntity;
+import org.apache.http.impl.client.BasicCredentialsProvider;
+import org.apache.http.impl.client.CloseableHttpClient;
+import org.apache.http.impl.client.HttpClients;
+import org.apache.http.util.EntityUtils;
 
 
 public class DBUtils {
-
-	
 	private static volatile DBUtils mdbUniqueDbu = null;
-	private static final String DRIVER = "org.postgresql.Driver";
-	private static final String URL = "jdbc:postgresql://bampfa.cspace.berkeley.edu/bampfa_domain_bampfa?ssl=true"; //&sslfactory=org.postgresql.ssl.NonValidatingFactory";
-	protected Connection mSqlConnection = null;
-	protected ArrayList<Statement> mStatements = null;	
-    protected PreparedStatement mSqlImageMetaDataQuery = null;    
+	
+	private static final String CSPACE_HOST = "bampfa-dev.cspace.berkeley.edu";
+	private static final String REPORT_URL = "https://" + CSPACE_HOST + "/cspace-services/reports/8e22a9da-efa1-4d1b-902c";
+	private static final String AUTH_REALM = "org.collectionspace.services";
+	
 	protected ArrayList<ImageMetaData> mImageMetaDataDataList = null;
 	
+	protected HttpClientContext mClientContext = null;
+	protected CloseableHttpClient mClient = null;
 	
-	public static synchronized DBUtils getInstance() throws SQLException, ClassNotFoundException, InstantiationException,IllegalAccessException {
-		    if (mdbUniqueDbu == null) {
-		    	mdbUniqueDbu = new DBUtils();
-		    }
-		    return mdbUniqueDbu;
+	public static synchronized DBUtils getInstance() throws ClassNotFoundException, InstantiationException, IllegalAccessException, ClientProtocolException, IOException {
+		if (mdbUniqueDbu == null) {
+			mdbUniqueDbu = new DBUtils();
+		}
+		return mdbUniqueDbu;
     }
 	
-	private DBUtils() throws SQLException, ClassNotFoundException, InstantiationException,IllegalAccessException {
-		mStatements = new ArrayList<Statement>();				
-		Class.forName(DRIVER).newInstance();
+	private DBUtils() throws ClassNotFoundException, InstantiationException,IllegalAccessException, ClientProtocolException, IOException {
 		connect();
 	}
 
-	private void connect() throws SQLException {
+	private void connect() throws ClientProtocolException, IOException {
 		Console console = System.console();
-		console.writer().println("Enter your database login information:");
-		String username = console.readLine("User: ");
+		
+		console.writer().println("Enter your CollectionSpace login information:");
+		
+		String username = console.readLine("Email: ");
 		char[] password = console.readPassword("Password: ");
 
-		mSqlConnection = DriverManager.getConnection(URL, username, new String(password));
+		CredentialsProvider credsProvider = new BasicCredentialsProvider();
+		
+		credsProvider.setCredentials(
+		    new AuthScope(CSPACE_HOST, AuthScope.ANY_PORT, AUTH_REALM, "basic"),
+		    new UsernamePasswordCredentials(username, new String(password)));
+		
+		mClientContext = HttpClientContext.create();
+		mClientContext.setCredentialsProvider(credsProvider);
+
+		mClient = HttpClients.createDefault();
+		
+		HttpGet httpGet = new HttpGet(REPORT_URL);
+		CloseableHttpResponse response = mClient.execute(httpGet, mClientContext);
+		
+		int statusCode = response.getStatusLine().getStatusCode();
+		response.close();
+		
+		if (statusCode < 200 || statusCode > 299) {
+			mClient.close();
+			throw new IOException(response.getStatusLine().getReasonPhrase());
+		}
 	}
 	
-	private PreparedStatement prepareStatement(String sStatement) throws SQLException {
-		PreparedStatement p = mSqlConnection.prepareStatement(sStatement);
-		mStatements.add(p);		
-		return p;
-	} 
-	
-	public void close() throws SQLException {
-		
-		for (int i = 0 ; i < mStatements.size() ; i++ ) {
-			((Statement)mStatements.get(i)).close();			
-		} 
+	public ArrayList<ImageMetaData> queryImageMetaData(String sACCNumber) throws ClientProtocolException, IOException {
+        int iRecordCount = 0;	        
 
-		if (mStatements != null) { 
-			mStatements.clear();
-			mStatements = null;
-		}
-		
-		if (mSqlConnection != null ) mSqlConnection.close();
-
-		if (mImageMetaDataDataList != null) {
-			mImageMetaDataDataList.clear();
-			mImageMetaDataDataList = null;
-		}
-						
-						
-	}
-
-	
-	public ArrayList<ImageMetaData> queryImageMetaData(String sACCNumber) throws SQLException {
-    	ResultSet rsIMD = null;
-        int iRecordCount = 0;
-         	        	        
-    	if ( mSqlImageMetaDataQuery == null) mSqlImageMetaDataQuery = prepareStatement(getImageMetaDataSqlQuery());
-    	mSqlImageMetaDataQuery.setString( 1, sACCNumber);
-    	rsIMD = mSqlImageMetaDataQuery.executeQuery();
-			    		    	
-    	if ( mImageMetaDataDataList == null ) 	    	
+    	if ( mImageMetaDataDataList == null ) {
     		mImageMetaDataDataList = new ArrayList<ImageMetaData>();
-    	else	
+    	}
+    	else {	
     		mImageMetaDataDataList.clear();
-        
-    	while (rsIMD.next()) {
-        	iRecordCount++;
-        	
-        	mImageMetaDataDataList.add( 
-        	new ImageMetaData(rsIMD.getString("Title"),
-        			rsIMD.getString("Artist"),
-        			rsIMD.getString("CreditLine"),
-        			rsIMD.getString("DateMade"),
-        			rsIMD.getString("IdNumber"),
-        			rsIMD.getString("ItemClass"),
-        			rsIMD.getString("Materials"),
-        			rsIMD.getString("Measurement"),
-        			rsIMD.getString("OriginOrPlace"),
-	        		rsIMD.getString("PhotoCredit"),
-	        		rsIMD.getString("Site"),
-	        		rsIMD.getString("CopyRightCredit"),
-        			rsIMD.getString("SubjectOne"),
-        			rsIMD.getString("SubjectTwo"),
-        			rsIMD.getString("SubjectThree"),
-        			rsIMD.getString("SubjectFour"),
-        			rsIMD.getString("SubjectFive"))
-        	);
-        }
-        	    	
-    	rsIMD.close();
-        	        
-        if (iRecordCount == 0) throw new SQLException("No Records Found.");
-        
-        return mImageMetaDataDataList;        
-    }	
+    	}
 
-	    
+		StringEntity payload = new StringEntity(
+			"<?xml version=\"1.0\" encoding=\"utf-8\" standalone=\"yes\"?>" +
+				"<ns2:invocationContext xmlns:ns2=\"http://collectionspace.org/services/common/invocable\">" +
+			    "<mode>nocontext</mode>" +
+			    "<params>" +
+			        "<param>" +
+			            "<key>idNumber</key>" +
+			            "<value>" + StringEscapeUtils.escapeXml10(sACCNumber) + "</value>" +
+			        "</param>" +
+			    "</params>" +
+			"</ns2:invocationContext>"
+		);
+		
+		HttpPost httpPost = new HttpPost(REPORT_URL);
+		httpPost.setHeader("Content-Type", "application/xml");
+		httpPost.setEntity(payload);
+		
+		CloseableHttpResponse response = mClient.execute(httpPost, mClientContext);
+
+		int statusCode = response.getStatusLine().getStatusCode();
+		
+		if (statusCode < 200 || statusCode > 299) {
+			response.close();
+			throw new IOException(response.getStatusLine().getReasonPhrase());
+		}
+		
+		String responseContent = null;
+		
+		try {
+			HttpEntity entity = response.getEntity();
+
+			if (entity != null) {
+				responseContent = EntityUtils.toString(entity, "UTF-8");
+			}
+		}
+		finally {
+		    response.close();
+		}
+		
+		if (responseContent != null) {
+			Iterable<CSVRecord> records = CSVFormat.DEFAULT.withHeader().withNullString("null").parse(new StringReader(responseContent));
+			
+			for (CSVRecord record : records) {
+	        	iRecordCount++;
+		    	
+	        	mImageMetaDataDataList.add(new ImageMetaData(
+					record.get("title"),
+					record.get("artist"),
+					record.get("creditline"),
+					record.get("datemade"),
+					record.get("idnumber"),
+					record.get("itemclass"),
+					record.get("materials"),
+					record.get("measurement"),
+					record.get("originorplace"),
+					record.get("photocredit"),
+					record.get("site"),
+					record.get("copyrightcredit"),
+					record.get("subjectone"),
+					record.get("subjecttwo"),
+					record.get("subjectthree"),
+					record.get("subjectfour"),
+					record.get("subjectfive")));
+			}
+		}
+		        	        
+        if (iRecordCount == 0) throw new IOException("No Records Found.");
     
-    private String getImageMetaDataSqlQuery() { 
-    	return new String ("SELECT artistcalc AS Artist, fullbampfacreditline AS CreditLine, datemade AS DateMade, idnumber AS IdNumber, itemclass AS ItemClass, " +
-    					   "materials AS Materials, measurement AS Measurement, artistorigin AS OriginOrPlace, title AS Title, " +
-    					   "photocredit AS PhotoCredit, site AS Site, copyrightcredit AS CopyRightCredit, " +
-    					   "subjectone AS SubjectOne, subjecttwo AS SubjectTwo, subjectthree AS SubjectThree, " +
-    					   "subjectfour AS SubjectFour, subjectfive AS SubjectFive " +
-    					   "FROM bampfa_denorm.bampfa_collectionitems_vw WHERE idnumber = ? "); 
-    }
-    
-    
+        return mImageMetaDataDataList;        
+	}    
             
 	/**
 	 * @param args
