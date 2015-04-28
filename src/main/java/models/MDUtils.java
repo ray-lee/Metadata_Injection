@@ -10,7 +10,10 @@ import java.sql.SQLException;
 import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.Iterator;
+import java.util.List;
 import java.util.Map;
+
+import org.apache.commons.lang3.StringUtils;
 
 import ca.digitalcave.moss.image.ExifToolWrapper;
 
@@ -57,32 +60,43 @@ public class MDUtils {
 	public Map prepareInjectData(ArrayList<ImageMetaData> alimd){
 		Map<String, String> tags = new HashMap<String, String>();
 		
-		for (int i=0; i < alimd.size() ; i ++) {			
+		for (ImageMetaData md : alimd) {
 			tags.clear();		
-			tags.put("creator", alimd.get(i).getArtist());
-			tags.put("description", "ARTIST: " + alimd.get(i).getArtist() +
-									" NATIONALITY: " + alimd.get(i).getOriginOrPlace() + 
-									" DATE_OF_WORK: " + alimd.get(i).getDateMade() +
-									((alimd.get(i).getSite().trim().isEmpty()) ? "" : " PLACE: " + alimd.get(i).getSite()) + 
-									" MATERIALS: " + alimd.get(i).getMaterials() + 
-									" DIMENSIONS: " + alimd.get(i).getMeasurement() +
-									" CREDIT_LINE: " + alimd.get(i).getCreditLine() +
-									((alimd.get(i).getCopyRightCredit().trim().isEmpty()) ? "" : " COPYRIGHT: " + alimd.get(i).getCopyRightCredit()) +
-									((alimd.get(i).getPhotoCredit().trim().isEmpty()) ? "" : " PHOTOGRAPHER: " + alimd.get(i).getPhotoCredit()));
-			tags.put("coverage", alimd.get(i).getDateMade() + 
-								((alimd.get(i).getSite().trim().isEmpty()) ? "" : " PLACE: " + alimd.get(i).getSite()));
-			tags.put("identifier", alimd.get(i).getIdNumber());
-			tags.put("type", alimd.get(i).getItemClass());
-			tags.put("title", alimd.get(i).getTitle());
-			tags.put("contributor", ((alimd.get(i).getPhotoCredit().trim().isEmpty())?"":"PHOTOGRAPHER: " + alimd.get(i).getPhotoCredit()));
-			tags.put("rights", alimd.get(i).getCopyRightCredit());
-			tags.put("subject", alimd.get(i).getSubjectOne() + 
-								alimd.get(i).getSubjectTwo() +
-								alimd.get(i).getSubjectThree() +
-								alimd.get(i).getSubjectFour() +
-								alimd.get(i).getSubjectFive());
-		  
+			tags.put("creator", md.getArtist());
+			tags.put("description", "ARTIST: " +md.getArtist() +
+									" NATIONALITY: " + md.getOriginOrPlace() + 
+									" DATE_OF_WORK: " + md.getDateMade() +
+									((md.getSite().trim().isEmpty()) ? "" : " PLACE: " + md.getSite()) + 
+									" MATERIALS: " + md.getMaterials() + 
+									" DIMENSIONS: " + md.getMeasurement() +
+									" CREDIT_LINE: " + md.getCreditLine() +
+									((md.getCopyRightCredit().trim().isEmpty()) ? "" : " COPYRIGHT: " + md.getCopyRightCredit()) +
+									((md.getPhotoCredit().trim().isEmpty()) ? "" : " PHOTOGRAPHER: " + md.getPhotoCredit()));
+			tags.put("coverage", md.getDateMade() + 
+								((md.getSite().trim().isEmpty()) ? "" : " PLACE: " + md.getSite()));
+			tags.put("identifier", md.getIdNumber());
+			tags.put("type", md.getItemClass());
+			tags.put("title", md.getTitle());
+			tags.put("contributor", ((md.getPhotoCredit().trim().isEmpty())?"":"PHOTOGRAPHER: " + md.getPhotoCredit()));
+			tags.put("rights", md.getCopyRightCredit());
 			
+			String[] allSubjects = new String[]{
+					md.getSubjectOne(),
+					md.getSubjectTwo(),
+					md.getSubjectThree(),
+					md.getSubjectFour(),
+					md.getSubjectFive()				
+			};
+			
+			List<String> subjects = new ArrayList<String>(allSubjects.length);
+			
+			for (int i=0; i<allSubjects.length; i++) {
+				if (StringUtils.isNotBlank(allSubjects[i])) {
+					subjects.add(allSubjects[i]);
+				}
+			}
+			
+			tags.put("subject", StringUtils.join(subjects, ", "));
 		}
 
 		return tags;
