@@ -28,7 +28,7 @@ public class DBUtils {
 	private static volatile DBUtils mdbUniqueDbu = null;
 	
 	private static final String CSPACE_HOST = "bampfa.cspace.berkeley.edu";
-	private static final String REPORT_URL = "https://" + CSPACE_HOST + "/cspace-services/reports/8e22a9da-efa1-4d1b-902c";
+	private static final String REPORT_URL = "https://" + CSPACE_HOST + "/cspace-services/reports/a154d7ca-8367-4944-a9c2";
 	private static final String AUTH_REALM = "org.collectionspace.services";
 	
 	protected ArrayList<ImageMetaData> mImageMetaDataDataList = null;
