@@ -27,7 +27,7 @@ import org.apache.http.util.EntityUtils;
 public class DBUtils {
 	private static volatile DBUtils mdbUniqueDbu = null;
 	
-	private static final String CSPACE_HOST = "bampfa-dev.cspace.berkeley.edu";
+	private static final String CSPACE_HOST = "bampfa.cspace.berkeley.edu";
 	private static final String REPORT_URL = "https://" + CSPACE_HOST + "/cspace-services/reports/8e22a9da-efa1-4d1b-902c";
 	private static final String AUTH_REALM = "org.collectionspace.services";
 	
@@ -41,7 +41,7 @@ public class DBUtils {
 			mdbUniqueDbu = new DBUtils();
 		}
 		return mdbUniqueDbu;
-    }
+		}
 	
 	private DBUtils() throws ClassNotFoundException, InstantiationException,IllegalAccessException, ClientProtocolException, IOException {
 		connect();
@@ -58,8 +58,8 @@ public class DBUtils {
 		CredentialsProvider credsProvider = new BasicCredentialsProvider();
 		
 		credsProvider.setCredentials(
-		    new AuthScope(CSPACE_HOST, AuthScope.ANY_PORT, AUTH_REALM, "basic"),
-		    new UsernamePasswordCredentials(username, new String(password)));
+				new AuthScope(CSPACE_HOST, AuthScope.ANY_PORT, AUTH_REALM, "basic"),
+				new UsernamePasswordCredentials(username, new String(password)));
 		
 		mClientContext = HttpClientContext.create();
 		mClientContext.setCredentialsProvider(credsProvider);
@@ -79,25 +79,25 @@ public class DBUtils {
 	}
 	
 	public ArrayList<ImageMetaData> queryImageMetaData(String sACCNumber) throws ClientProtocolException, IOException {
-        int iRecordCount = 0;	        
+				int iRecordCount = 0;					
 
-    	if ( mImageMetaDataDataList == null ) {
-    		mImageMetaDataDataList = new ArrayList<ImageMetaData>();
-    	}
-    	else {	
-    		mImageMetaDataDataList.clear();
-    	}
+			if ( mImageMetaDataDataList == null ) {
+				mImageMetaDataDataList = new ArrayList<ImageMetaData>();
+			}
+			else {	
+				mImageMetaDataDataList.clear();
+			}
 
 		StringEntity payload = new StringEntity(
 			"<?xml version=\"1.0\" encoding=\"utf-8\" standalone=\"yes\"?>" +
 				"<ns2:invocationContext xmlns:ns2=\"http://collectionspace.org/services/common/invocable\">" +
-			    "<mode>nocontext</mode>" +
-			    "<params>" +
-			        "<param>" +
-			            "<key>idNumber</key>" +
-			            "<value>" + StringEscapeUtils.escapeXml10(sACCNumber) + "</value>" +
-			        "</param>" +
-			    "</params>" +
+					"<mode>nocontext</mode>" +
+					"<params>" +
+							"<param>" +
+									"<key>idNumber</key>" +
+									"<value>" + StringEscapeUtils.escapeXml10(sACCNumber) + "</value>" +
+							"</param>" +
+					"</params>" +
 			"</ns2:invocationContext>"
 		);
 		
@@ -124,16 +124,16 @@ public class DBUtils {
 			}
 		}
 		finally {
-		    response.close();
+				response.close();
 		}
 		
 		if (responseContent != null) {
 			Iterable<CSVRecord> records = CSVFormat.DEFAULT.withHeader().withNullString("null").parse(new StringReader(responseContent));
 			
 			for (CSVRecord record : records) {
-	        	iRecordCount++;
-		    	
-	        	mImageMetaDataDataList.add(new ImageMetaData(
+						iRecordCount++;
+					
+						mImageMetaDataDataList.add(new ImageMetaData(
 					record.get("title"),
 					record.get("artist"),
 					record.get("creditline"),
@@ -153,19 +153,19 @@ public class DBUtils {
 					record.get("subjectfive")));
 			}
 		}
-		        	        
-        if (iRecordCount == 0) throw new IOException("No Records Found.");
-    
-        return mImageMetaDataDataList;        
-	}    
-            
+											
+				if (iRecordCount == 0) throw new IOException("No Records Found.");
+		
+				return mImageMetaDataDataList;				
+	}		
+						
 	/**
 	 * @param args
 	 */
 	public static void main(String[] args) {
 		// TODO Auto-generated method stub
 		ArrayList<ImageMetaData> alimd;
-        
+				
 		try {
 		DBUtils db = DBUtils.getInstance();
 		
